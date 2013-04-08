@@ -1,4 +1,3 @@
-
 DEFINT A-Z
 DECLARE SUB tasten (t$)
 DECLARE SUB intro ()
@@ -7,11 +6,11 @@ DECLARE SUB altshiftstrg ()
 DECLARE SUB LP (x, y, c, t$) ' stellt Zahlen und Buchstaben in 5*5 Pixel dar
 DECLARE SUB clg ()
 DECLARE SUB show ()
-DECLARE SUB ZAHL (x, y, c, Lrz, z) ' ntzlich fr ver„nderliche Zahlen
+DECLARE SUB ZAHL (x, y, c, Lrz, z)   ' ntzlich fr ver„nderliche Zahlen
 DECLARE SUB menu ()
 DECLARE SUB palC ()
 DECLARE SUB showc ()
-DECLARE SUB clkey () ' l”scht den Tastenpuffer
+DECLARE SUB clkey ()                 ' l”scht den Tastenpuffer
 DECLARE SUB grafik ()
 DECLARE SUB cursor ()
 DECLARE SUB message (m$)
@@ -30,25 +29,26 @@ DIM SHARED g(300, 200) AS STRING * 1 ' Umgerechnetes Datenfeld (mit Zoomfaktor)
 DIM SHARED xc, yc, xk, yk, xg, yg, xs, ys, ccc, z
 DIM SHARED ink  AS STRING, f AS STRING
 DIM SHARED za AS STRING, ze AS STRING, zz AS STRING, ee AS STRING
+DIM SHARED convert                   ' Farbumwandlung in 16 Farben
 
 DIM SHARED cc(9) AS STRING * 1       ' benutzerdefinierte/gespeicherte Farben
 DIM SHARED ct(23, 10) AS STRING * 1  ' Farbtabelle
 
-DIM SHARED c1 AS STRING ' Variablen zum Zwischenspeichern der
-DIM SHARED c2 AS STRING ' Farben (unter dem Cursor)
+DIM SHARED c1 AS STRING              ' Variablen zum Zwischenspeichern der
+DIM SHARED c2 AS STRING              ' Farben (unter dem Cursor)
 DIM SHARED c3 AS STRING
 DIM SHARED c4 AS STRING
  
-pfad$ = ".\grf\ " ' Pfad zu den Bilddateien
+pfad$ = ".\qed\ " ' Pfad zu den Dateien
 
-'ON ERROR GOTO fehler
+ON ERROR GOTO fehler
 
 1
 SCREEN 13
 CLS
 
 10 '* ini-Datei einlesen
-  OPEN "getit.ini" FOR INPUT AS #1
+  OPEN "qedit.ini" FOR INPUT AS #1
     LINE INPUT #1, t$: xg = VAL(t$)
     LINE INPUT #1, t$: yg = VAL(t$)
     LINE INPUT #1, t$
@@ -95,7 +95,7 @@ LOOP
 
 cursorEx
 30 '* ini-Datei aktualisieren
-  OPEN "getit.ini" FOR OUTPUT AS #1
+  OPEN "qedit.ini" FOR OUTPUT AS #1
     PRINT #1, xg
     PRINT #1, yg
     PRINT #1, ccc
@@ -109,9 +109,9 @@ SYSTEM
 
 40 ' Datei ”ffnen
   message "datei ”ffnen:"
-  d$ = datei$ + ".grf"
+  d$ = datei$
   IF (d$ = "") THEN RETURN
-  IF (ink = CHR$(27)) THEN RETURN
+  d$ = d$ + ".qed"
   OPEN pfad$ + d$ FOR INPUT AS #1
   LINE INPUT #1, t$: xg = VAL(t$)
   LINE INPUT #1, t$: yg = VAL(t$)
@@ -128,12 +128,12 @@ SYSTEM
 45 ' Datei speichern
   s = speichern
   IF s > 0 THEN
-    message "dateiname eingeben:"
+    message "dateiname eing. :"
     d$ = datei$
-    IF (d$ = "") THEN RETURN
+    IF d$ = "" THEN regenerate: RETURN
     d$ = d$ + ee
    
-    IF s = 1 THEN          ' * als GRF-Datei
+    IF s = 1 THEN          ' * als qed-Datei
       OPEN pfad$ + d$ FOR OUTPUT AS #1
       PRINT #1, xg
       PRINT #1, yg
@@ -147,7 +147,7 @@ SYSTEM
       zeile2 (za)
       FOR y = 0 TO yg
         FOR x = 0 TO xg
-          PRINT #1, zeile$(x, y, c, ze)
+          PRINT #1, zeile$(x, y, ASC(g(x, y)), ze)
           NEXT
         NEXT
       zeile2 (zz)
@@ -160,8 +160,8 @@ SYSTEM
   RETURN
 
 
-50 '* neue ini-Datei erstellen
-  OPEN "getit.ini" FOR OUTPUT AS #1
+50 ' * neue ini-Datei erstellen
+  OPEN "qedit.ini" FOR OUTPUT AS #1
     PRINT #1, 50
     PRINT #1, 20
     PRINT #1, 15
@@ -188,6 +188,9 @@ SELECT CASE ERR
   END SELECT
 clkey: SLEEP: message ""
 RESUME NEXT
+
+SUB benutzerdef
+END SUB
 
 SUB clg '* l”scht die Grafikausgabe
 LINE (100, 28)-(309, 174), 25, B
@@ -216,7 +219,7 @@ END SUB
 FUNCTION datei$
   DO
     SLEEP
-    LINE (81, 190)-(308, 198), 0, BF
+    LINE (95, 190)-(308, 198), 0, BF
     ink = INKEY$
     IF (ink <> CHR$(8)) AND (ink <> CHR$(13)) AND (ink <> CHR$(27)) AND (ink <> "/") AND (ink <> "\") AND (ink <> ":") AND (ink <> "*") AND (ink <> "?") AND (ink <> CHR$(34)) AND (ink <> "<") AND (ink <> ">") AND (ink <> "|") THEN
       t$ = t$ + ink': LOCATE 1: PRINT ink
@@ -248,11 +251,13 @@ SUB help
   LINE (30, 0)-(171, 10), 28, B
   LP 35, 7, 30, "stratysoft grafikeditor 2.0"
   LP 5, 17, 26, "( ": LP 0, 0, 29, "Hilfeauswahl": LP 0, 0, 26, " )"
-  LP 30, 27, 31, " 1":  LP 0, 0, 28, " allgemein"
-  LP 30, 0, 31, " 2":   LP 0, 0, 28, " Tastenbelegung"
-  LP 30, 0, 31, " 3":   LP 0, 0, 28, " Bugbehebung"
-  LP 30, 0, 31, " 4":   LP 0, 0, 28, " Sonstiges"
-  LP 30, 0, 31, " ESC": LP 0, 0, 28, " Ende"
+  LP 30, 27, 31, " 1":  LP 50, -1, 28, "- allgemein"
+  LP 30, 0, 31, " 2":   LP 50, -1, 28, "- Tasten"
+  LP 30, 0, 31, " 3":   LP 50, -1, 28, "- Bugbehebung"
+  LP 30, 0, 31, " 4":   LP 50, -1, 28, "- Sonstiges"
+  LP 30, 0, 31, "ESC": LP 50, -1, 28, "- Ende"
+  LP 30, 0, 31, ""
+  LP 25, 0, 31, "email:": LP 0, 0, 29, "  strathausen (a) gmx.de"
 
 DO
   ink = INKEY$
@@ -267,7 +272,7 @@ IF (ink = CHR$(27)) THEN GOTO he
   LP 35, 7, 30, "stratysoft grafikeditor 2.0"
 
 h = VAL(ink)
-ON h GOTO h1, h2
+ON h GOTO h1, h2, h3, h4
 
 h1:
   LP 5, 17, 26, "( ": LP 0, 0, 29, "Hilfe": LP 0, 0, 26, " )"
@@ -276,7 +281,7 @@ h1:
   LP 5, 0, 27, "zb. als qbasic- oder pascal-programme abspeichern."
   LP 5, 0, 27, "(sehr ntzlich, um programme abwechslungsreich zu gestalten)"
   LP 5, 0, 27, ""
-  LP 5, 0, 27, "ausserdem k”nnen sie diese bilder auch als .grf-datei abspeichern,"
+  LP 5, 0, 27, "ausserdem k”nnen sie diese bilder auch als .qed-datei abspeichern,"
   LP 5, 0, 27, "um sie sp„ter mit q-edit weiter zu bearbeiten."
   LP 5, 0, 27, "in einer solchen datei findet man eine reihe von zahlen."
   LP 5, 0, 27, "die ersten beiden zahlen geben die breite und h”he"
@@ -285,23 +290,41 @@ h1:
   LP 5, 0, 27, "es gibt auch die m”glichkeit benutzerdefinierte dateien zu er-"
   LP 5, 0, 27, "stellen (zb. fr andere programmiersprachen)."
   LP 5, 0, 27, ""
-  LP 5, 0, 29, "have a lot fun!"
+  LP 5, 0, 29, "viel spaá!"
   SLEEP
   GOTO he
 
 h2:
-  LP 5, 17, 26, "( ": LP 0, 0, 29, "tastenbelegung": LP 0, 0, 26, " )"
-  LP 30, 27, 28, "SHIFT-LEFT":  LP 0, 0, 31, " ->": LP 0, 0, 28, " Farbpipette"
-  LP 30, 0, 28, "STRG;CRTL":    LP 0, 0, 31, " ->": LP 0, 0, 28, " Malen"
-  LP 30, 0, 28, "ENTER + Zahl": LP 0, 0, 31, " ->": LP 0, 0, 28, " Farbe speichern (Zellen 0-9)"
-  LP 30, 0, 28, "ALT + Zahl":   LP 0, 0, 31, " ->": LP 0, 0, 28, " gespeicherte Farbe abrufen (Zellen 0-9)"
-  LP 30, 0, 28, "Cursortasten": LP 0, 0, 31, " ->": LP 0, 0, 28, " Cursor auf dem Bild bewegen"
-  LP 30, 0, 28, "Z":            LP 0, 0, 31, " ->": LP 0, 0, 28, " Zoom (1:1, 2:1, 4:1)"
+  LP 5, 17, 26, "( ": LP 0, 0, 30, "tastenbelegung": LP 0, 0, 26, " )"
+  LP 30, 0, 28, ""
+  LP 30, 0, 28, "shift-left":   LP 95, -1, 31, " ->": LP 0, 0, 28, " Malen"
+  LP 30, 0, 28, "space/leer":   LP 95, -1, 31, " ->": LP 0, 0, 28, " Malen"
+  LP 30, 0, 28, "strg/crtl":    LP 95, -1, 31, " ->": LP 0, 0, 28, " Farbpipette"
+  LP 30, 0, 28, "enter + zahl": LP 95, -1, 31, " ->": LP 0, 0, 28, " Farbe speichern (Zellen 0-9)"
+  LP 30, 0, 28, "alt + zahl":   LP 95, -1, 31, " ->": LP 0, 0, 28, " gespeicherte Farbe abrufen (Zellen 0-9)"
+  LP 30, 0, 28, "cursortasten": LP 95, -1, 31, " ->": LP 0, 0, 28, " Cursor auf dem Bild bewegen"
+  LP 30, 0, 28, "z":            LP 95, -1, 31, " ->": LP 0, 0, 28, " Zoom (1:1, 2:1, 4:1)"
+  LP 30, 0, 28, ""
+  LP 30, 0, 28, ""
+  LP 5, 0, 26, "( ": LP 0, 0, 30, "hotkeys": LP 0, 0, 26, " )"
+  LP 30, 0, 28, ""
+  LP 30, 0, 28, "f1":           LP 95, -1, 31, " ->": LP 0, 0, 28, " hilfe"
+  LP 30, 0, 28, "Z":            LP 95, -1, 31, " ->": LP 0, 0, 28, " Zoom (1:1, 2:1, 4:1)"
+  LP 30, 0, 28, "Z":            LP 95, -1, 31, " ->": LP 0, 0, 28, " Zoom (1:1, 2:1, 4:1)"
   LP 30, 0, 28, ""
   SLEEP
   GOTO he
 
 h3:
+  LP 5, 17, 26, "( ": LP 0, 0, 30, "m”gliche bugs": LP 0, 0, 26, " )"
+  LP 20, 0, 28, ""
+  LP 20, 0, 30, "pfad nicht gefunden"
+  LP 20, 0, 28, ""
+  LP 20, 0, 28, "gegen diesen bug kann man folgendes tun:"
+  LP 20, 0, 28, "1. das verzeichnis '.\qed' muss existieren."
+  LP 20, 0, 28, ""
+  LP 20, 0, 28, ""
+  LP 20, 0, 28, ""
   SLEEP
   GOTO he
 
@@ -333,6 +356,7 @@ END SUB
 SUB LP (x, y, c, t$) ' v2.1
 IF x = 0 AND y = 0 THEN x = xk: y = yk
 IF y = 0 THEN y = yk + 7
+IF y < 0 THEN y = yk
 t$ = UCASE$(t$)
 
 FOR p = 1 TO LEN(t$)
@@ -360,9 +384,12 @@ SELECT CASE MID$(t$, p, 1)
   CASE CHR$(34):   pa = 46
   CASE "?":        pa = 47
   CASE "0" TO "9": pa = ASC(MID$(t$, p, 1))
+  CASE "'":        pa = 58
+  CASE "\":        pa = 59
+  CASE "/":        pa = 60
   END SELECT
 
-ON pa GOTO Ap, Bp, Cp, Dp, Ep, Fp, Gp, Hp, Ip, Jp, Kp, LP, Mp, Np, Op, pp, Qp, Rp, Sp, Tp, Up, Vp, Wp, Xp, Yp, Zp, AEp, OEp, UEp, SZp, Kla1, Klz1, Kla2, Klz2, Kla3, Klz3, lr, Pnkt, DPnkt, Komma, Smk, Glz, Mns, Pls, Ausr, Anf, frz, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9
+ON pa GOTO Ap, Bp, Cp, Dp, Ep, Fp, Gp, Hp, Ip, Jp, Kp, LP, Mp, Np, Op, pp, Qp, Rp, Sp, Tp, Up, Vp, Wp, Xp, Yp, Zp, AEp, OEp, UEp, SZp, Kla1, Klz1, Kla2, Klz2, Kla3, Klz3, lr, Pnkt, DPnkt, Komma, Smk, Glz, Mns, Pls, Ausr, Anf, frz, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, aps, bsl, slh
 
 GOTO pe
 
@@ -1008,7 +1035,30 @@ p9:
   PSET (x + 3, y - 0), c
   PSET (x + 4, y - 0), c
   x = x + 5
-
+  GOTO pe
+aps:
+  PSET (x + 3, y - 4), c
+  PSET (x + 3, y - 3), c
+  PSET (x + 2, y - 2), c
+  x = x + 3
+  GOTO pe
+bsl:
+  PSET (x + 2, y - 4), c
+  PSET (x + 3, y - 3), c
+  PSET (x + 4, y - 2), c
+  PSET (x + 5, y - 1), c
+  PSET (x + 6, y), c
+  x = x + 6
+  GOTO pe
+slh:
+  PSET (x + 6, y - 4), c
+  PSET (x + 5, y - 3), c
+  PSET (x + 4, y - 2), c
+  PSET (x + 3, y - 1), c
+  PSET (x + 2, y), c
+  x = x + 6
+'  GOTO pe
+ 
 pe:
 NEXT
 xk = x: yk = y
@@ -1065,6 +1115,7 @@ END SUB
 
 SUB regenerate ' h„ufig aufgerufene Unterprogramme
 
+  CLS
   menu
   initshow
   show
@@ -1126,7 +1177,7 @@ LP 5, 17, 26, "( ": LP 0, 0, 29, "bild speichern": LP 0, 0, 26, " )"
 
 message ""
 
-  LP 30, 27, 31, " 1":  LP 0, 0, 28, " als grf-datei"
+  LP 30, 27, 31, " 1":  LP 0, 0, 28, " als qed-datei"
   LP 30, 0, 31, " 2":   LP 0, 0, 28, " als qbasic-programm"
   LP 30, 0, 31, " 3":   LP 0, 0, 28, " als pascal-programm"
   LP 30, 0, 31, " 4":   LP 0, 0, 28, " benutzerdefiniert"
@@ -1137,8 +1188,11 @@ DO
   LOOP UNTIL (ink = CHR$(27)) OR ((ink >= "1") AND (ink <= "4"))
 
 IF (ink = CHR$(27)) THEN s = -1: GOTO se
+
 s = VAL(ink)
-ee = ""
+ee = ""      'Dateiendung
+convert = 0  'in 16 Farben Konvertieren
+
 ON s GOTO se, s2, s3, s4
 
 s2:
@@ -1148,18 +1202,19 @@ s2:
   ee = ".bas"              'Dateiendung
   GOTO se
 
-s3:
-  za = "uses graph;|var x,y,c:integer;|begin"
-  ze = "putPixel(|x|,|y|,|c|);"
-  zz = "end."
+s3:  
+  za = "Uses|  Graph;||Var|  Gd, Gm, x, y : Integer;||Begin|  Gd:=Detect;|  InitGraph (Gd,Gm,'C:\tp\bgi\');| y:=50;| x:=50"
+  ze = "  putPixel(x +|x|,y +|y|,|c|);"
+  zz = "  ReadLn;|  CloseGraph;|end."
   ee = ".pas"
+  convert = 1
   GOTO se
 
 s4:
 
 se:
 ze = ze + "  "
-IF ee = "" THEN ee = ".grf"
+IF ee = "" THEN ee = ".qed"
 speichern = s
 
 END FUNCTION
@@ -1618,7 +1673,9 @@ ze:
 NEXT
 END SUB ' tool by StratySoft, Philipp Strathausen
 
-FUNCTION zeile$ (x, y, c, zl$)
+FUNCTION zeile$ (x, y, c, zl$) '
+
+IF convert THEN IF c >= 16 THEN c = c * 15 / 255
 
 FOR i = 1 TO LEN(zl$) - 2
   IF MID$(zl$, i, 1) = "|" THEN
@@ -1640,17 +1697,14 @@ t$ = ""
 FOR i = 1 TO LEN(z2$)
  
   IF MID$(z2$, i, 1) = "|" THEN
-    PRINT t$
     PRINT #1, t$: t$ = ""
   ELSE
     t$ = t$ + MID$(z2$, i, 1)
-    PRINT t$
     END IF
    
   NEXT
    
 PRINT #1, t$
-PRINT t$
-SLEEP
+
 END SUB
 
