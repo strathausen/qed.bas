@@ -3,14 +3,14 @@ DECLARE SUB tasten (t$)
 DECLARE SUB intro ()
 DECLARE SUB help ()
 DECLARE SUB altshiftstrg ()
-DECLARE SUB LP (x, y, c, t$) ' stellt Zahlen und Buchstaben in 5*5 Pixel dar
+DECLARE SUB LP (x, y, c, t$)         ' display characters in 5x5 pixels
 DECLARE SUB clg ()
 DECLARE SUB show ()
-DECLARE SUB ZAHL (x, y, c, Lrz, z)   ' nÅtzlich fÅr verÑnderliche Zahlen
+DECLARE SUB ZAHL (x, y, c, Lrz, z)   ' useful for changing numbers
 DECLARE SUB menu ()
 DECLARE SUB palC ()
 DECLARE SUB showc ()
-DECLARE SUB clkey ()                 ' lîscht den Tastenpuffer
+DECLARE SUB clkey ()                 ' delete key buffer
 DECLARE SUB grafik ()
 DECLARE SUB cursor ()
 DECLARE SUB message (m$)
@@ -38,8 +38,8 @@ DIM SHARED c1 AS STRING              ' Variablen zum Zwischenspeichern der
 DIM SHARED c2 AS STRING              ' Farben (unter dem Cursor)
 DIM SHARED c3 AS STRING
 DIM SHARED c4 AS STRING
- 
-pfad$ = ".\qed\ " ' Pfad zu den Dateien
+
+pfad$ = ".\\qed\\" ' Pfad zu den Dateien
 
 ON ERROR GOTO fehler
 
