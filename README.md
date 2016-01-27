@@ -1,6 +1,8 @@
 # QED.bas
 
-A graphical editor for DOS written QBasic.
+A graphical EDitor for DOS written QBasic.
+
+<img src="screen.png">
 
 ## Usage
 
